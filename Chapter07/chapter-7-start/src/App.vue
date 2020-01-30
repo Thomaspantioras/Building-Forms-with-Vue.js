@@ -2,34 +2,21 @@
   <div id="app" class="container py-4">
     <div class="row">
       <div class="col-12">
-        <form @submit.prevent="onSubmit">
-          <BaseInput 
-            label="First Name:"
-            v-model="form.firstName"
+        <form>
+          <Renderer 
+            v-for="(element, name) in schema" 
+            :key="name" 
+            :element="element"
+            v-model="form[name]"
           />
-
-          <BaseInput  
-            label="Last Name:"
-            v-model="form.lastName"
-          />
-
-          <BaseInput 
-            label="Email:" 
-            v-model="form.email"
-            type="email" 
-          />
-
-          <BaseSelect 
-            label="What do you love most about Vue?" 
-            :options="loveOptions"
-            v-model="form.love"
-          />
-
           <div class="form-group">
-            <button  
+            <button 
+              @click.prevent="onSubmit" 
               type="submit" 
               class="btn btn-primary"
-            >Submit</button>
+            >
+              Submit
+            </button>
           </div>
         </form>
       </div>
@@ -38,32 +25,34 @@
 </template>
 
 <script>
-import BaseInput from '@/components/BaseInput';
-import BaseSelect from '@/components/BaseSelect';
-
+// import schema from "@/data/schema.json";
+import { parse } from "@/libraries/Api";
+import axios from "axios";
+import Renderer from "@/components/Renderer";
 export default {
-  name: 'app',
-  components: { BaseInput, BaseSelect },
+  name: "app",
+  components: { Renderer },
   data() {
     return {
-      form: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        love: 'fun'
-      },
-      loveOptions: [
-        { label: 'Fun to use', value: 'fun' },
-        { label: 'Friendly learning curve', value: 'curve' },
-        { label: 'Amazing documentation', value: 'docs' },
-        { label: 'Fantastic community', value: 'community' }
-      ]
-    }
+      // schema: schema,
+      schema: {},
+      form: {}
+    };
+  },
+  created() {
+    axios
+      .get("http://localhost:3000/schema")
+      .then(response => {
+        this.schema = parse(response.data);
+      })
+      .catch(error => {
+        console.log("Network error", error);
+      });
   },
   methods: {
     onSubmit() {
-      console.log('Submit clicked');
+      console.log("Submit clicked");
     }
   }
-}
+};
 </script>
